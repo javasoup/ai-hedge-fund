@@ -1,0 +1,35 @@
+# Android Vision Agent configuration.
+# Everything here is overridable via env vars of the form AVA_<SECTION>_<KEY>,
+# e.g. AVA_DEVICE_SERIAL=emulator-5554.
+
+device:
+  # ADB device serial. Leave empty to use the only connected device.
+  # For network ADB set e.g. "192.168.1.50:5555" and run `adb connect` first.
+  serial: ""
+  # Milliseconds to wait after an action before re-capturing the screen.
+  settle_ms: 900
+
+perception:
+  backend: "yolo"          # "yolo" | "fallback"
+  # Path to your fine-tuned UI-element weights. If missing, the detector
+  # transparently drops to the OpenCV contour fallback so the loop still runs.
+  weights: "models/yolo26-ui.pt"
+  conf: 0.25               # detection confidence threshold
+  max_elements: 60         # cap boxes handed to the reasoner
+
+reasoning:
+  backend: "ollama"        # "ollama" | "openai" | "stub"
+  model: "gemma3:4b"
+  endpoint: "http://localhost:11434"
+  temperature: 0.1
+  # Downscale the screenshot sent to the VLM to save memory/latency on Jetson.
+  image_max_side: 1080
+
+loop:
+  max_steps: 12            # hard cap on actions per intent
+  # If the screen hash is unchanged for this many steps, declare stuck.
+  stall_limit: 3
+
+macros:
+  enabled: true
+  path: "macros.json"

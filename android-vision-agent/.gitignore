@@ -1,0 +1,16 @@
+# model weights & artifacts
+models/
+*.pt
+*.onnx
+*.engine
+
+# runtime output
+macros.json
+*.png
+!scripts/*.png
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
