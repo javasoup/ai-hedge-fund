@@ -16,6 +16,7 @@ from pathlib import Path
 import numpy as np
 
 from ..config import CONFIG
+from .ocr import get_ocr
 
 
 @dataclass
@@ -43,6 +44,7 @@ class Detector:
         self.backend = pcfg.get("backend", "yolo")
         self.conf = float(pcfg.get("conf", 0.25))
         self.max_elements = int(pcfg.get("max_elements", 60))
+        self.use_ocr = bool(pcfg.get("ocr", True))
         self._weights = pcfg.get("weights", "")
         self._model = None
         if self.backend == "yolo":
@@ -71,7 +73,19 @@ class Detector:
         else:
             elements = self._detect_fallback(image)
         elements.sort(key=lambda e: e.confidence, reverse=True)
-        return elements[: self.max_elements]
+        elements = elements[: self.max_elements]
+        if self.use_ocr:
+            self._attach_text(image, elements)
+        return elements
+
+    def _attach_text(self, image: np.ndarray, elements: list[Element]) -> None:
+        """Fill each element's `text` via OCR when available (no-op otherwise)."""
+        ocr = get_ocr()
+        if not ocr.available:
+            return
+        for e in elements:
+            if not e.text:
+                e.text = ocr.text_in(image, e.box)
 
     def _detect_yolo(self, image: np.ndarray) -> list[Element]:
         results = self._model.predict(image, conf=self.conf, verbose=False)

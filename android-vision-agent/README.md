@@ -66,6 +66,30 @@ android-vision-agent/
 └── README.md
 ```
 
+## Before you trust vision: probe the app
+
+Even when an app is "the only way in," Android often still exposes its buttons
+through the accessibility tree — which is exact, offline, and GPU-free. Run this
+with your target app on screen to find out whether you even need vision:
+
+```bash
+python scripts/probe_app.py
+```
+
+If it reports plenty of clickable, labelled nodes, the app is **not** a true
+canvas and you'd get far higher reliability driving it via UIAutomator, with the
+vision loop as a fallback. If the tree is empty/blocked, vision is genuinely
+warranted — proceed below.
+
+## Reliability model (why this is safe enough for a van)
+
+The models are **not** in the hot path for routine use. The first time a goal
+is solved, its concrete actions are saved as a **macro**; every later call is a
+deterministic, offline, zero-model **replay**. YOLO + Gemma only re-engage to
+solve a new goal or to **self-heal** when an app update moves things. So the
+common case (`water_heater_on` for the hundredth time) is just a fixed tap
+sequence — no GPU, no network, no guessing.
+
 ## Quick start
 
 ```bash

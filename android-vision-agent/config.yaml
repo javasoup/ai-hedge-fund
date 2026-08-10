@@ -16,6 +16,7 @@ perception:
   weights: "models/yolo26-ui.pt"
   conf: 0.25               # detection confidence threshold
   max_elements: 60         # cap boxes handed to the reasoner
+  ocr: true                # OCR element text for better grounding (needs tesseract; no-op if absent)
 
 reasoning:
   backend: "ollama"        # "ollama" | "openai" | "stub"
